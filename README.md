@@ -43,8 +43,8 @@ yourself is recommended.
   your friends from the community in a P2P way (in case GitHub gets
   DDoS'd), or however you like.
 
-  * This file would contain an agreed upon Bitcoin block number for
-    randomization seed, `launch_btc_block_height`.
+  * This file would contain an agreed upon EOS block number for
+    randomization seed, `launch_eos_block_height`.
   * It contains hashes of the openning balances snapshot csv file, as
     well as of the compiled system contract.
   * It contains the list of block producers that you want in the network.
