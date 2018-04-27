@@ -1,0 +1,18 @@
+package: github.com/eoscanada/eos-bios
+import:
+- package: github.com/bronze1man/go-yaml2json
+- package: github.com/eoscanada/eos-go
+  subpackages:
+  - ecc
+  - system
+  - token
+- package: github.com/spf13/cobra
+  version: ~0.0.2
+- package: github.com/spf13/viper
+  version: ~1.0.2
+testImport:
+- package: github.com/stretchr/testify
+  version: ~1.2.1
+  subpackages:
+  - assert
+  - require
