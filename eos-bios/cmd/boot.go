@@ -52,7 +52,7 @@ Boot is what happens when you run "eos-bios orchestrate" and you are selected to
 			log.Fatalln("error parsing --api-address:", err)
 		}
 
-		api := eos.New(apiAddressURL, net.ChainID())
+		api := eos.New(apiAddressURL.String(), net.ChainID())
 		api.SetSigner(eos.NewKeyBag())
 
 		b := bios.NewBIOS(net, api)
