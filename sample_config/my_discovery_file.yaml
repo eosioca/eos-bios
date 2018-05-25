@@ -50,11 +50,11 @@ target_contents:
     comment: "Refers to github.com/eoscanada/eos-bios/files/boot_sequence.yaml"
 
   - name: snapshot.csv
-    ref: /ipfs/QmSRbJeZaWQXXJfK34z6hah7RN8DYr45BGqwNE7YNeFH6s
+    ref: /ipfs/QmeAL8aTvrBVKQbKEzeYwp9oKEPuajQSaaubLxHBuAZXCo
     comment: "Gathered by someone. Published by EOS Canada. Period 332, with account names"
 
   - name: snapshot_unregistered.csv
-    ref: /ipfs/QmYX7f4cL25dYyTBMmVKq8UrunCM46apw56Zi5SmYw1qgh
+    ref: /ipfs/QmeVMxxeWeDk5GH2kThnZoxiDGbGnTvW2LFFV8yqq8aFhf
     comment: "Gathered by someone. Published by EOS Canada. Period 332"
 
   - name: eosio.bios.abi
