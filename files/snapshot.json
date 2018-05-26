@@ -1,73 +1,69 @@
 {
 	"version": "0.4.0-beta",
 	"parameters": {
-		"period": 332,
+		"period": 340,
 		"block_begin": 3904416,
-		"block_end": 5618934,
+		"block_end": 5662196,
 		"b1_dist": true
 	},
 	"accounts": {
-		"valid": 184869,
-		"registered": 89880,
-		"registered_included_percent": "48.61821073300553%",
-		"fallback": 94989,
-		"fallback_included_percent": "51.381789266994474%"
+		"valid": 98900,
+		"registered": 98900,
+		"registered_included_percent": "100%",
+		"fallback": 0,
+		"fallback_included_percent": "0%"
 	},
 	"supply": {
-		"total": 1000000000.1614,
-		"expected": 964000000,
-		"included": 881856347.1862,
-		"percent_included": "91%",
-		"liquid": 964000000.1606,
-		"margin_of_error": "-0.0000000166597510%"
+		"total": 1000000000.1667,
+		"expected": 980000000,
+		"included": 440510916.113,
+		"percent_included": "44%",
+		"liquid": 980000000.1648,
+		"margin_of_error": "-0.0000000168163265%"
 	},
 	"meta": {
-		"author": "Anonymous",
-		"timestamp_started": 1526408810,
-		"timestamp_completed": 1526460823,
-		"total_time": "14h 26m 53s"
+		"author": "EOS Authority",
+		"timestamp_started": 1527072892,
+		"timestamp_completed": 1527082135,
+		"total_time": "2h 34m 3s"
 	},
 	"checksum": {
 		"output": {
-			"snapshot": "664bde8495020be72623e2532c32a91cdd63f379",
-			"snapshot_unregistered": "e32c38d4783f08a1651dd5bde8152f91e9b049b9",
-			"distribution": "317fc6ad15f85625bceb2227fd5bba69feeed483"
+			"snapshot": "bc9ab77c2ff6035b521be04fc222674395d56fe4",
+			"snapshot_unregistered": "a25be05a3a8ec23a73f17e87364548d7f52c54af",
+			"distribution": "84dbcb503ef5f4120782ebb0e3c6956128e93ad1"
 		},
 		"db": {
-			"wallets": "cb3d8856fd267b81cd0e2488894ed84eee6e979b",
-			"buys": "c18c6e8db13c51b936083a05f5f59c9ce6dd6168",
-			"claims": "68cb6e6a2579f47db6eea516d8bc417bf814b94c",
-			"registrations": "876880f4e694c58efb8fb3e1129ae447c639b455",
-			"transfers": "ba0f493d7c0c7edb7572cd776ffe2104ceee0e62",
-			"snapshot": "62b66bc6db475b39d9da4ab61c56a66867c50738",
-			"public_keys": "758c297dd4d90983638150eec0ac9d565f9333be"
+			"wallets": "3e5a310fb065c2ef33dc1716c10a4b2d03d1ad4b",
+			"buys": "6a88aaf401084495b45ff343dd00958042761e33",
+			"claims": "df0e27bd72a0da2d5c08a72b6ca95e64770f06fc",
+			"registrations": "8a0ebe85fa4552673eed650222c61b459cc0ad45",
+			"transfers": "86e28765f4ccf570872f08f8dc4c0fe54d80665d",
+			"snapshot": "d27cae1144812ba30c420ca4ef593913e1d7b099",
+			"public_keys": "617d0062d44c0042d67701ac9b2d2540b1177b86"
 		}
 	},
 	"stats": {
 		"contract": {
-			"buys": 224673,
-			"claims": 625130,
-			"reclaimables": 791,
-			"registrations": 158400,
-			"transfers": 3151333
+			"buys": 228066,
+			"claims": 628649,
+			"reclaimables": 839,
+			"registrations": 172963,
+			"transfers": 3278270
 		}
 	},
 	"config": {
-		"period": 332,
-		"author": "Anonymous",
+		"period": 340,
+		"author": "EOS Authority",
 		"include_b1": true,
 		"snapshot_minimum_balance": 1,
-		"overwrite_snapshot": false,
-		"recalculate_wallets": false,
-		"skip_web3_sync": true,
-		"registration_fallback": true,
-		"load_config": true,
-		"resume": true,
-		"poll": true
+		"overwrite_snapshot": true,
+		"recalculate_wallets": true,
+		"skip_web3_sync": false
 	},
 	"block_range": {
 		"begin": 3904416,
-		"end": 5618934
+		"end": 5662196
 	},
 	"distribution_status": {
 		"crowdsale_over": false,
