@@ -197,9 +197,6 @@ func (op *OpSetPriv) Actions(b *BIOS) (out []*eos.Action, err error) {
 type OpCreateToken struct {
 	Account      eos.AccountName
 	Amount       eos.Asset
-	CanWhitelist bool `json:"can_whitelist"`
-	CanFreeze    bool `json:"can_freeze"`
-	CanRecall    bool `json:"can_recall"`
 }
 
 func (op *OpCreateToken) ResetTestnetOptions() {}
