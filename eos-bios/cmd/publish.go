@@ -29,6 +29,11 @@ var publishCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		fmt.Printf("Target block: %d (current: %d)\n", net.MyPeer.Discovery.SeedNetworkLaunchBlock, currentBlock)
+		
+		// Adding peer timezone offset in launch time
+		if localOffset, err := time.ParseDuration(net.MyPeer.Discovery.GMTOffset); err != nil {
+			launchTime = launchTime.UTC().Add(localOffset)
+		}
 		past := ""
 		if launchTime.Before(time.Now()) {
 			past = " - past!"
