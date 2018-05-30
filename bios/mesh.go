@@ -4,6 +4,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+	"sort"
+	"github.com/spf13/viper"
 )
 
 func getPeerIndexesToMeshWith(total, myPos int) map[int]bool {
@@ -92,10 +94,37 @@ func (b *BIOS) someTopmostPeersAddresses() []string {
 
 func (b *BIOS) meshableShuffledProducers() []*Peer {
 	var meshableProducers []*Peer
+
+	// only return active peers
+	// when wanting to mesh. As the list grows, we noticed
+	// that some ABPs where meshing against non participating
+	// ABPs. Which resulted in them having to manually configure.
+
+	// when active-only has been specified it will only
+	// mesh to those peers deemed Active()
+
+	activeOnly = viper.GetBool("active-only")
 	for _, peer := range b.ShuffledProducers {
-		if peer.Discovery.TargetP2PAddress != "none" {
-			meshableProducers = append(meshableProducers, peer)
-		}
+
+		// skip "none" always
+		if peer.Discovery.TargetP2PAddress != "none" { continue }
+
+		// when activeonly defined, we only mesh against
+		// active peers, as such when not active we continue
+		// to the next
+		if activeOnly && !peer.Active() { continue }
+
+		// passed criteria, adding to the meshables
+		meshableProducers = append(meshableProducers, peer)
 	}
+
+	// in case we get 0 back, this will always result in unexpected
+	// behaviour. As such complain to stderr
+	if len(meshableProducers) == 0 {
+		fmt.Fprintf(os.Stderr,
+			"meshable producers returns no values. Check your
+			--active-only flag, when enabled disable")
+	}
+
 	return meshableProducers
 }
