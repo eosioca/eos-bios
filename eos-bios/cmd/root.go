@@ -70,8 +70,10 @@ func init() {
 	RootCmd.PersistentFlags().StringP("cache-path", "", filepath.Join(homedir, ".eos-bios-cache"), "directory to store cached data from discovered network")
 	RootCmd.PersistentFlags().BoolP("verbose", "v", false, "Display verbose output (also see 'output.log')")
 	RootCmd.PersistentFlags().String("elect", "", "Force the election of the given BIOS Boot node")
+	RootCmd.PersistentFlags().BoolP("active-only", "a", false, "Will mesh only against peers considered Active")
 
-	for _, flag := range []string{"cache-path", "my-discovery", "ipfs", "seednet-keys", "write-actions", "seednet-api", "target-api", "verbose", "elect"} {
+
+	for _, flag := range []string{"cache-path", "my-discovery", "ipfs", "seednet-keys", "write-actions", "seednet-api", "target-api", "verbose", "elect", "active-only"} {
 		if err := viper.BindPFlag(flag, RootCmd.PersistentFlags().Lookup(flag)); err != nil {
 			panic(err)
 		}
