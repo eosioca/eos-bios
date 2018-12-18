@@ -1,8 +1,9 @@
 #include "eosio.unregd.hpp"
 #include <eosiolib/crypto.h>
+#include "rlp/encode.hpp"
 using eosio::unregd;
 
-EOSIO_ABI(eosio::unregd, (add)(regaccount)(setmaxeos)(chngaddress))
+EOSIO_ABI(eosio::unregd, (add)(regaccount)(regaccount2)(setmaxeos)(chngaddress))
 
 /**
  * Add a mapping between an ethereum_address and an initial EOS token balance.
@@ -66,6 +67,18 @@ void unregd::setmaxeos(const asset& maxeos) {
  * Register an EOS account using the stored information (address/balance) verifying an ETH signature
  */
 void unregd::regaccount(const bytes& signature, const string& account, const string& eos_pubkey_str) {
+  regaccount_impl(signature, account, eos_pubkey_str, -1);
+}
+
+/**
+ * Same as regaccount, but instead of looking for the address recovered from the signature,
+ * this function will use a derived contract address generated using recovered address and the nonce passed as parameter.
+ */
+void unregd::regaccount2(uint32_t nonce, const bytes& signature, const string& account, const string& eos_pubkey_str) {
+  regaccount_impl(signature, account, eos_pubkey_str, nonce);
+}
+
+void unregd::regaccount_impl(const bytes& signature, const string& account, const string& eos_pubkey_str, int nonce) {
 
   eosio_assert(signature.size() == 66, "Invalid signature");
   eosio_assert(account.size() == 12, "Invalid account length");
@@ -123,6 +136,16 @@ void unregd::regaccount(const bytes& signature, const string& account, const str
 
   uint8_t eth_address[20];
   memcpy(eth_address, pubkeyhash.hash + 12, 20);
+
+  // Derive ETH contract address if nonce is specified
+  if(nonce >= 0) {
+    uint8_t buffer[32];
+    auto len = rlp_encode(eth_address, nonce, buffer, 32);
+    rhash_keccak_256_init(&shactx);
+    rhash_keccak_update(&shactx, buffer, len);
+    rhash_keccak_final(&shactx, pubkeyhash.hash);
+    memcpy(eth_address, pubkeyhash.hash + 12, 20);
+  }
 
   // Verify that the ETH address exists in the "addresses" eosio.unregd contract table
   addresses_index addresses(_self, _self);
