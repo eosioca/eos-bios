@@ -3,7 +3,7 @@
 #include "rlp/encode.hpp"
 using eosio::unregd;
 
-EOSIO_ABI(eosio::unregd, (add)(regaccount)(regaccount2)(setmaxeos)(chngaddress))
+EOSIO_DISPATCH(eosio::unregd, (add)(regaccount)(regaccount2)(setmaxeos)(chngaddress))
 
 /**
  * Add a mapping between an ethereum_address and an initial EOS token balance.
@@ -12,7 +12,7 @@ void unregd::add(const ethereum_address& ethereum_address, const asset& balance)
   require_auth(_self);
 
   auto symbol = balance.symbol;
-  eosio_assert(symbol.is_valid() && symbol == CORE_SYMBOL, "balance must be EOS token");
+  eosio_assert(symbol.is_valid() && symbol == eosiosystem::get_core_symbol(), "balance must be EOS token");
 
   eosio_assert(ethereum_address.length() == 42, "Ethereum address should have exactly 42 characters");
 
@@ -31,7 +31,7 @@ void unregd::chngaddress(const ethereum_address& old_address, const ethereum_add
   eosio_assert(old_address.length() == 42, "Old Ethereum address should have exactly 42 characters");
   eosio_assert(new_address.length() == 42, "New Ethereum address should have exactly 42 characters");
 
-  auto index = addresses.template get_index<N(ethereum_address)>();
+  auto index = addresses.template get_index<"ethaddress"_n>();
   auto itr = index.find(compute_ethereum_address_key256(old_address));
 
   eosio_assert( itr != index.end(), "Old Ethereum address not found");
@@ -48,7 +48,7 @@ void unregd::setmaxeos(const asset& maxeos) {
   require_auth(_self);
 
   auto symbol = maxeos.symbol;
-  eosio_assert(symbol.is_valid() && symbol == CORE_SYMBOL, "maxeos invalid symbol");
+  eosio_assert(symbol.is_valid() && symbol == eosiosystem::get_core_symbol(), "maxeos invalid symbol");
 
   auto itr = settings.find(1);
   if (itr == settings.end()) {
@@ -57,7 +57,7 @@ void unregd::setmaxeos(const asset& maxeos) {
       s.max_eos_for_8k_of_ram = maxeos;
     });
   } else {
-    settings.modify(itr, 0, [&](auto& s) {
+    settings.modify(itr, same_payer, [&](auto& s) {
       s.max_eos_for_8k_of_ram = maxeos;
     });
   }
@@ -89,7 +89,7 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
       eosio_assert(false, "Invalid account name");
   }
 
-  auto naccount = string_to_name(account.c_str());
+  auto naccount = name(account.c_str());
 
   // Verify that the account does not exists
   eosio_assert(!is_account(naccount), "Account already exists");
@@ -107,7 +107,7 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
 
   //Calculate sha3 hash of message
   sha3_ctx shactx;
-  checksum256 msghash;
+  capi_checksum256 msghash;
   rhash_keccak_256_init(&shactx);
   rhash_keccak_update(&shactx, (const uint8_t*)message, strlen(message));
   rhash_keccak_final(&shactx, msghash.hash);
@@ -129,7 +129,7 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
   uECC_decompress(compressed_pubkey+1, pubkey, uECC_secp256k1());
 
   // Calculate ETH address based on decompressed pubkey
-  checksum256 pubkeyhash;
+  capi_checksum256 pubkeyhash;
   rhash_keccak_256_init(&shactx);
   rhash_keccak_update(&shactx, pubkey, 64);
   rhash_keccak_final(&shactx, pubkeyhash.hash);
@@ -148,8 +148,7 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
   }
 
   // Verify that the ETH address exists in the "addresses" eosio.unregd contract table
-  addresses_index addresses(_self, _self);
-  auto index = addresses.template get_index<N(ethereum_address)>();
+  auto index = addresses.template get_index<"ethaddress"_n>();
 
   auto itr = index.find(compute_ethereum_address_key256(eth_address));
   eosio_assert(itr != index.end(), "Address not found");
@@ -159,8 +158,10 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
   eosio_assert(balances.size() == 3, "Unable to split snapshot");
   eosio_assert(itr->balance == balances[0] + balances[1] + balances[2], "internal error");
 
+  auto core_symbol = eosiosystem::get_core_symbol();
+
   // Get max EOS willing to spend for 8kb of RAM
-  asset max_eos_for_8k_of_ram = asset(0);
+  asset max_eos_for_8k_of_ram = asset(0, core_symbol);
   auto sitr = settings.find(1);
   if( sitr != settings.end() ) {
     max_eos_for_8k_of_ram = sitr->max_eos_for_8k_of_ram;
@@ -176,21 +177,21 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
   };
 
   // Create account with the same key for owner/active
-  INLINE_ACTION_SENDER(call::eosio, newaccount)( N(eosio), {{N(eosio.unregd),N(active)}},
-    {N(eosio.unregd), naccount, auth, auth});
+  INLINE_ACTION_SENDER(call::eosio, newaccount)( "eosio"_n, {{"eosio.unregd"_n,"active"_n}},
+    {"eosio.unregd"_n, naccount, auth, auth});
 
   // Buy RAM for this account (8k)
-  INLINE_ACTION_SENDER(call::eosio, buyram)( N(eosio), {{N(eosio.regram),N(active)}},
-    {N(eosio.regram), naccount, amount_to_purchase_8kb_of_RAM});
+  INLINE_ACTION_SENDER(call::eosio, buyram)( "eosio"_n, {{"eosio.regram"_n,"active"_n}},
+    {"eosio.regram"_n, naccount, amount_to_purchase_8kb_of_RAM});
 
   // Delegate bandwith
-  INLINE_ACTION_SENDER(call::eosio, delegatebw)( N(eosio), {{N(eosio.unregd),N(active)}},
-    {N(eosio.unregd), naccount, balances[0], balances[1], 1});
+  INLINE_ACTION_SENDER(call::eosio, delegatebw)( "eosio"_n, {{"eosio.unregd"_n,"active"_n}},
+    {"eosio.unregd"_n, naccount, balances[0], balances[1], 1});
 
   // Transfer remaining if any (liquid EOS)
-  if( balances[2] != asset(0) ) {
-    INLINE_ACTION_SENDER(call::token, transfer)( N(eosio.token), {{N(eosio.unregd),N(active)}},
-    {N(eosio.unregd), naccount, balances[2], ""});
+  if( balances[2] != asset(0, core_symbol) ) {
+    INLINE_ACTION_SENDER(call::token, transfer)( "eosio.token"_n, {{"eosio.unregd"_n,"active"_n}},
+    {"eosio.unregd"_n, naccount, balances[2], ""});
   }
 
   // Remove information for the ETH address from the eosio.unregd DB
@@ -198,7 +199,7 @@ void unregd::regaccount_impl(const bytes& signature, const string& account, cons
 }
 
 void unregd::update_address(const ethereum_address& ethereum_address, const function<void(address&)> updater) {
-  auto index = addresses.template get_index<N(ethereum_address)>();
+  auto index = addresses.template get_index<"ethaddress"_n>();
 
   auto itr = index.find(compute_ethereum_address_key256(ethereum_address));
   if (itr == index.end()) {
