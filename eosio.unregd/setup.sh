@@ -1,6 +1,7 @@
 #!/bin/sh
 rm -rf ~/eosio-wallet/./default.wallet
-cleos wallet create --to-console 2>&1 | tail -n1 | tail -c+2 | head -c-2 > /tmp/pass
+#cleos wallet create --to-console 2>&1 | tail -n1 | tail -c+2 | head -c-2 > /tmp/pass
+cleos wallet create --to-console 2>&1 > /tmp/pass
 
 cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 cleos wallet import --private-key 5KFDkQMpWu9chAEfgQNiEDwRdJePEVJiK92jx6vvUrQA8qFBXUd
@@ -16,17 +17,29 @@ cleos create account eosio eosio.saving EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtH
 cleos create account eosio eosio.stake  EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio eosio.vpay   EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
-cleos set contract eosio.token ~/eos/build/contracts/eosio.token -p eosio.token
-cleos push action eosio.token create '[ "eosio", "10000000000.0000 EOS"]' -p eosio.token
-cleos push action eosio.token issue '[ "eosio", "1000000000.0000 EOS"]' -p eosio
-cleos set contract eosio.msig ~/eos/build/contracts/eosio.msig -p eosio.msig
+CONTRACTS=/home/matu/dev/eosio.contracts/build
 
-cleos create account eosio eosio.unregd EOS5BQS4J7f5MKdhTKEXuZQpfwwJDYsikVShaKbVJTmGbDXUvTnXw EOS5BQS4J7f5MKdhTKEXuZQpfwwJDYsikVShaKbVJTmGbDXUvTnXw
-cleos set code eosio.unregd ./eosio.unregd.wasm -p eosio.unregd
-cleos set abi eosio.unregd ./eosio.unregd.abi -p eosio.unregd
+cleos set contract eosio.token $CONTRACTS/eosio.token -p eosio.token
+cleos push action eosio.token create '[ "eosio", "10000000000.0000 EOS"]' -p eosio.token
+cleos push action eosio.token issue '[ "eosio", "1000000000.0000 EOS", "all supply"]' -p eosio
+
+cleos set contract eosio $CONTRACTS/eosio.system -p eosio
+cleos push action eosio init '[0,"4,EOS"]' -p eosio@active
+
+cleos set contract eosio.msig $CONTRACTS/eosio.msig -p eosio.msig
+cleos push action eosio setpriv '{"account":"eosio.msig","is_priv":1}' -p eosio@active
+
+cleos system newaccount \
+--buy-ram-kbytes 3000 \
+--stake-net "1.0000 EOS" \
+--stake-cpu "1.0000 EOS" \
+eosio eosio.unregd \
+EOS5BQS4J7f5MKdhTKEXuZQpfwwJDYsikVShaKbVJTmGbDXUvTnXw \
+EOS5BQS4J7f5MKdhTKEXuZQpfwwJDYsikVShaKbVJTmGbDXUvTnXw
+
+cleos set contract eosio.unregd ../eosio.unregd -p eosio.unregd
 cleos push action eosio.unregd setmaxeos '["1.5000 EOS"]' -p eosio.unregd
 
-cleos set contract eosio ~/dev/eos/build/contracts/eosio.system -p eosio
 cleos transfer eosio eosio.unregd "500000.0000 EOS" "sum(unreg_EOS[i])" -p eosio
 
 cleos system newaccount \
