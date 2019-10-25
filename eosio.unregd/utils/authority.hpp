@@ -1,6 +1,10 @@
 #pragma once
 
+#include <eosiolib/action.hpp>
+
 namespace eosio {
+
+typedef uint16_t weight_type;
 
 struct permission_level_weight {
    permission_level  permission;
